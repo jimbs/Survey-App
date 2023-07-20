@@ -94,12 +94,15 @@ const createOption = (request, response) => {
 
   pool.query(
     'INSERT INTO options (label,times_selected,query_id) VALUES ($1,$2,$3) RETURNING *',
-    [label, times_selected ? times_selected : 0, query_id],
+    [label, 0, query_id],
     (error, results) => {
       if (error) {
         throw error
       }
-      response.status(201).send(`User added with ID: ${results.rows[0].id}`)
+      response
+        .status(201)
+        .send(`User added with ID: ${results.rows[0].id}`)
+        .json(results.rows[0])
     }
   )
 }
