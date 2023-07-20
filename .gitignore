@@ -12,13 +12,14 @@ node_modules
 dist
 dist-ssr
 coverage
-*.local
+env.*
+
 
 /cypress/videos/
 /cypress/screenshots/
 
 # Editor directories and files
-.vscode/*
+.vscode/
 !.vscode/extensions.json
 .idea
 *.suo
@@ -26,3 +27,4 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+.prettierrc.json
