@@ -34,26 +34,29 @@ const createSurvey = (request, response) => {
   const { question } = request.body
 
   pool.query(
-    'INSERT INTO surveys (question) VALUES ($2) RETURNING *',
+    'INSERT INTO surveys (question) VALUES ($1) RETURNING *',
     [question],
     (error, results) => {
       if (error) {
         throw error
       }
-      response.status(201).send(`User added with ID: ${results.rows[0].id}`)
+      console.log(results.rows)
+      response.status(201).json(results.rows[0])
     }
   )
 }
 
 const updateSurvey = (request, response) => {
   const id = parseInt(request.params.id)
+  console.log(request.body)
   const { question } = request.body
 
   pool.query('UPDATE surveys SET question = $1 WHERE id = $2', [question, id], (error, results) => {
     if (error) {
       throw error
     }
-    response.status(200).send(`User modified with ID: ${id}`)
+
+    response.status(200).send(`Survey modified with ID: ${id}`)
   })
 }
 
@@ -64,7 +67,7 @@ const deleteSurvey = (request, response) => {
     if (error) {
       throw error
     }
-    response.status(200).send(`User deleted with ID: ${id}`)
+    response.status(204).send(`Survey deleted with ID: ${id}`)
   })
 }
 
@@ -99,10 +102,7 @@ const createOption = (request, response) => {
       if (error) {
         throw error
       }
-      response
-        .status(201)
-        .send(`User added with ID: ${results.rows[0].id}`)
-        .json(results.rows[0])
+      response.status(201).send(`Option added with ID: ${results.rows[0].id}`).json(results.rows[0])
     }
   )
 }
@@ -116,10 +116,10 @@ const updateOption = (request, response) => {
     `UPDATE options SET ${parseSetQuery(request.body)} WHERE id = $4`,
     [label, times_selected, query_id, id],
     (error, results) => {
-      if (error) {
-        throw error
-      }
-      response.status(200).send(`User modified with ID: ${id}`)
+      if (error) throw error
+
+      console.log(results.rows[0])
+      response.status(200).send(`Option modified with ID: ${id}`).json(results.rows[0])
     }
   )
 }
@@ -131,7 +131,7 @@ const deleteOption = (request, response) => {
     if (error) {
       throw error
     }
-    response.status(200).send(`User deleted with ID: ${id}`)
+    response.status(200).send(`Option deleted with ID: ${id}`)
   })
 }
 
