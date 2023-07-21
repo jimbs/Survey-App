@@ -15,9 +15,6 @@ const app = createApp(App)
 
 app.use(createPinia())
 
-// app.component(VExpansionPanels)
-// app.component(VExpansionPanel)
-// app.component(VExpansionPanelTitle)
 app.use(
   createVuetify({
     components: { ExpansionPanel }
