@@ -48,16 +48,19 @@
           </v-expansion-panel-title>
           <v-expansion-panel-text variant="light" class="text-left">
             <v-radio-group v-model="_survey['answer']" hide-details>
-              <v-radio v-for="opt in _survey.options" :label="opt.label" :value="opt.id">
+              <v-radio v-for="(opt, i) in _survey.options" :label="opt.label" :value="opt.id">
                 <template v-slot:label>
                   <span class="text-subtitle-1">
                     {{ opt.label }}
-
                   </span>
                   <div>
                     <span
-                      @click="(e) => editOption(e, _survey.id)"
-                      class="edit-btn mdil mdil-pencil mdil-size-10 transition-delay ml-2"
+                      @click="(e) => editOption(e, [_survey.id, i])"
+                      class="edit-btn mdil mdil-pencil mdil-size-10 transition-delay ml-4"
+                    />
+                    <span
+                      @click="(e) => onClickDelete(e, _survey.id)"
+                      class="edit-btn mdil mdil-delete mdil-size-10 transition-delay ml-1"
                     />
                   </div> </template
               ></v-radio>
@@ -68,6 +71,13 @@
       <survey-modal
         :key="showEditSurvey"
         :show="showEditSurvey"
+        @hide="hideModal"
+        @action="apiSuccess"
+      />
+
+      <option-modal
+        :key="showEditOption"
+        :show="showEditOption"
         @hide="hideModal"
         @action="apiSuccess"
       />
@@ -87,19 +97,22 @@
 </template>
 
 <script setup>
-import { ref, provide, onMounted, computed } from 'vue'
+import { ref, provide, onMounted, computed, onBeforeMount } from 'vue'
 import { useSurveyStore } from '@/stores/surveys'
+import { useOptionStore } from '@/stores/options'
 import surveyModal from './components/surveyModal/index.vue'
+import optionModal from './components/optionModal/index.vue'
 import confirmationModal from './components/confimationModal/index.vue'
 
 const surveyStore = useSurveyStore()
+const optionStore = useOptionStore()
+
 let showEditSurvey = ref(false)
 let showEditOption = ref(false)
 let showConfirmation = ref(false)
 let focusedSurveyId = ref(0)
-let focusedOptionId = ref(0)
+let optionSurveysIndex = ref(0)
 let surveys = ref([])
-let options = ref([])
 
 let focusedSurvey = computed(() => {
   const { value } = surveys
@@ -109,18 +122,25 @@ let focusedSurvey = computed(() => {
     : { question: '' }
 })
 
+let focusedOption = computed(() => {
+  const { value } = focusedSurvey
+
+  console.log(value.id ? value.options[optionSurveysIndex.value] : { label: '' })
+
+  return value.id ? value.options[optionSurveysIndex.value] : { label: '' }
+})
+
 function editQuestion(e, id) {
-  e.stopPropagation()
-  e.preventDefault()
+  stopPropagation(e)
   focusedSurveyId.value = id
   showEditSurvey.value = !showEditSurvey.value
 }
 
-function editOption(e, id) {
-  e.stopPropagation()
-  e.preventDefault()
-  focusedSurveyId.value = id
-  showEditSurvey.value = !showEditSurvey.value
+function editOption(e, arr) {
+  stopPropagation(e)
+  optionSurveysIndex.value = arr[1]
+  focusedSurveyId.value = arr[0]
+  showEditOption.value = !showEditSurvey.value
 }
 
 function addQuestion(e) {
@@ -141,12 +161,12 @@ function hideModal() {
   showEditOption.value = false
   showConfirmation.value = false
   focusedSurveyId.value = 0
-  focusedOptionId.value = 0
+  optionSurveysIndex.value = 0
 }
 
 async function updateSurveyState() {
   const res = await surveyStore.getSurveys('/surveys')
-  surveys.value = res
+  surveys.value = surveyStore.getSurveyAccordion
 }
 
 async function onClickDelete(e, id) {
@@ -157,13 +177,21 @@ async function onClickDelete(e, id) {
 }
 
 function showStatistic(e) {
-  e.preventDefault()
+  stopPropagation(e)
+}
+
+function stopPropagation(e) {
   e.stopPropagation()
+  e.preventDefault()
 }
 
 provide('toEditSurvey', focusedSurvey)
 
-onMounted(async () => {
+provide('toEditOption', focusedOption)
+
+onMounted(async () => {})
+onBeforeMount(async () => {
+  await optionStore.getOptions()
   await updateSurveyState()
 })
 </script>

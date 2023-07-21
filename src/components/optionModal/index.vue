@@ -5,14 +5,14 @@
         <v-card-item>
           <v-text-field class="border" label="Question" hide-details v-model="label" />
         </v-card-item>
-        <template v-slot:append>
+        <template class="pl-0" v-slot:append>
           <a
             class="close-icon mdil mdil-plus mdil-rotate-45 mdil-18px background-light-green-darken-1 text-black"
             @click="onHide"
           />
         </template>
         <v-card-actions class="justify-end align-right pr-2">
-          <v-btn color="#7CB342">{{ state ? 'Update' : 'Create' }}</v-btn>
+          <v-btn color="#7CB342" @click="onSubmit">{{ state ? 'Update' : 'Create' }}</v-btn>
           <v-btn color="#AAA" @click="onHide">Cancel</v-btn>
         </v-card-actions>
       </v-card>

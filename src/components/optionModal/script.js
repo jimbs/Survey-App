@@ -1,26 +1,39 @@
-import { ref, defineProps, computed, onUpdated, toRefs, defineComponent } from 'vue'
+import { ref, inject, computed, onUpdated, toRefs, defineComponent } from 'vue'
+import { useOptionStore } from '../../stores/options'
 
 export default defineComponent({
   name: 'OptionModal',
   props: {
     show: Boolean,
-    id: String | Number,
-    option: Object,
-    onHide: Function
+    onHide: Function,
+    onAction: Function
   },
   setup(e, { attrs }) {
-    let props = toRefs(e)
-    let label = computed(() => {
-      return props.option.value.id ?? ""
-    })
-    // onUpdated(() => {
-    //   label.value = props.option.value.label
-    // })
+    let label = ref('')
+    let option = inject('toEditOption')
+    const optionStore = useOptionStore()
 
     const state = computed(() => {
-      return !!props.option.value.id
+      return !!option.value.id
     })
 
-    return { ...props, label, state }
+    label.value = option.value?.label || ''
+
+    async function onSubmit() {
+      if (state.value) {
+        const { id } = option.value
+        await optionStore.updateOption({
+          id,
+          label: label.value
+        })
+        e.onAction()
+        return
+      }
+
+      await optionStore.addOption({ label: label.value })
+      e.onAction()
+    }
+
+    return { option, label, state, onSubmit }
   }
 })
