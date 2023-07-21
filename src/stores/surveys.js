@@ -1,9 +1,21 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { useOptionStore } from './options'
 
 export const useSurveyStore = defineStore('surveys', () => {
+  const optionStore = useOptionStore()
   const surveys = ref([])
   const url = import.meta.env.VITE_APP_API_BASE_URL + '/survey'
+
+  const getSurveyAccordion = computed(() => {
+    console.log(optionStore.options.value)
+    return surveys.value.map((survey) => {
+      return {
+        ...survey,
+        options: { ...optionStore.options.filter((opt) => opt.survey_id == survey.id) }
+      }
+    })
+  })
 
   async function getSurveys() {
     const res = await fetch(url + 's').then((res) => res.json())
@@ -51,5 +63,5 @@ export const useSurveyStore = defineStore('surveys', () => {
     return res.ok
   }
 
-  return { surveys, getSurveys, updateSurvey, addSurvey, removeSurvey }
+  return { surveys, getSurveyAccordion, getSurveys, updateSurvey, addSurvey, removeSurvey }
 })
