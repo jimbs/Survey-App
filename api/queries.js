@@ -112,16 +112,11 @@ const updateOption = (request, response) => {
 
   const { label, times_selected, query_id } = request.body
 
-  pool.query(
-    `UPDATE options SET ${parseSetQuery(request.body)} WHERE id = $4`,
-    [label, times_selected, query_id, id],
-    (error, results) => {
-      if (error) throw error
+  pool.query(`UPDATE options SET label = $1 WHERE id = $2`, [label, id], (error, results) => {
+    if (error) throw error
 
-      console.log(results.rows[0])
-      response.status(200).send(`Option modified with ID: ${id}`).json(results.rows[0])
-    }
-  )
+    response.status(200).send(`Option modified with ID: ${id}`).json(results.rows[0])
+  })
 }
 
 const deleteOption = (request, response) => {
@@ -146,9 +141,10 @@ function parseSetQuery(obj) {
 
 function parseResult(res) {
   const [surveys, options] = res
-  return surveys.rows.map((survey) => {
-    return { ...survey, options: options.rows.filter((opt) => opt.survey_id == survey.id) }
-  })
+  // return surveys.rows.map((survey) => {
+  //   return { ...survey, options: options.rows.filter((opt) => opt.survey_id == survey.id) }
+  // })
+  return surveys.rows
 }
 
 module.exports = {
